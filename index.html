@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <link rel="stylesheet" href="style.css">
+<style>
+    
+
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #e9eff1; /* Light gray background */
+          }
+          
+          .container {
+            width: 90%;
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center; /* Center text only in the header */
+          }
+          
+          .login, .chat-container {
+            padding: 20px;
+          }
+          
+          .login button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 18px;
+            background-color: #0078ff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+          }
+          
+          .login button:hover {
+            background-color: #005bb5;
+          }
+          
+          .chat-container {
+            display: none;
+          }
+          
+          .chat-header {
+            background-color: #0078ff; /* Messenger blue */
+            color: #fff;
+            padding: 10px;
+            font-weight: bold;
+          }
+          
+          .chat-box {
+            max-height: 400px; /* Set max height for chat box */
+            overflow-y: auto; /* Enable scrolling for long chat */
+            border: none; /* Remove border for a cleaner look */
+            padding: 10px; /* Padding inside chat box */
+            margin-bottom: 10px; /* Space below chat box */
+            background-color: #f9f9f9; /* Light background for chat box */
+          }
+          
+          .message {
+            max-width: 75%; /* Adjust as necessary */
+            word-wrap: break-word; /* Break long words */
+            margin: 5px; /* Space between messages */
+            padding: 10px; /* Padding around message */
+            border-radius: 10px; /* Rounded corners */
+            position: relative; /* For pseudo-elements */
+          }
+          
+          .sent {
+            background-color: #0078ff; /* Messenger blue for sent messages */
+            color: white; /* White text for contrast */
+            margin-left: auto; /* Align sent messages to the right */
+            text-align: right; /* Align text of sent messages to the right */
+          }
+          
+          .received {
+            background-color: #e4e6eb; /* Light gray for received messages */
+            color: black; /* Black text for contrast */
+            margin-right: auto; /* Align received messages to the left */
+            text-align: left; /* Align text of received messages to the left */
+          }
+          
+          .timestamp {
+            display: block; /* Show timestamp on a new line */
+            font-size: 0.75em; /* Smaller text for the timestamp */
+            color: rgba(0, 0, 0, 0.705); /* Gray color for timestamp */
+            text-align: right; /* Align timestamp to the right */
+          }
+          
+          .login-message {
+              margin-top: 15px; /* Space above the login message */
+              padding: 10px; /* Padding around the message */
+              background-color: #e7f3fe; /* Light blue background */
+              border: 1px solid #0078ff; /* Blue border */
+              border-radius: 5px; /* Rounded corners */
+              color: #0078ff; /* Blue text color */
+              font-size: 16px; /* Font size */
+              font-weight: bold; /* Bold text */
+          }
+          
+          input[type="text"] {
+            width: calc(100% - 80px); /* Adjust width to fit buttons */
+            padding: 10px; /* Padding */
+            border: 1px solid #ccc; /* Border for input field */
+            border-radius: 5px; /* Rounded corners */
+            margin-right: 5px; /* Space before the button */
+          }
+          
+          button {
+            padding: 10px; /* Padding */
+            border: none; /* Remove default button border */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor for buttons */
+          }
+          
+          #sendBtn {
+            background-color: #0078ff; /* Messenger blue */
+            color: white; /* White text for contrast */
+          }
+          
+          #sendBtn:hover {
+            background-color: #005bb5; /* Darker blue on hover */
+          }
+          
+          #clearBtn {
+            margin-top: 10px;
+            background-color: #ff4c4c; /* Red for clear button */
+            color: white; /* White text */
+          }
+          
+          #clearBtn:hover {
+            background-color: #cc0000; /* Darker red on hover */
+          }
+          .reply-container {
+            background-color: #f0f0f0; /* Light background for the reply context */
+            border: 1px solid #ccc; /* Border to distinguish it */
+            padding: 10px;
+            margin-bottom: 10px; /* Space below the reply context */
+          }
+          
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="login">
+            <h2>Select User</h2>
+            <button onclick="selectUser('Arjhon')">Login as Arjhon</button>
+            <button onclick="selectUser('Ara')">Login as Ara</button>
+            <div class="login-message" id="loginMessage" style="display: none;"></div> <!-- New message div -->
+        </div>
+<div class="chat-container">
+    <div id="loginMessage" style="display: none;"></div>
+    <div id="chatBox" class="chat-box"></div>
+    <div id="replyContainer" class="reply-container" style="display: none;"></div> <!-- Reply context -->
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+    <button id="clearBtn">Clear Messages</button>
+</div>
+
+    </div>
+    <script>let currentUser = ''; // Store the current user
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const replyContainer = document.getElementById('replyContainer'); // Container for reply context
+        const chatContainer = document.querySelector('.chat-container');
+        
+        function selectUser(user) {
+            currentUser = user; // Set the current user
+            chatContainer.style.display = 'block'; // Show the chat container
+            document.getElementById('loginMessage').textContent = `You logged in as ${user}`; // Set the login message
+            document.getElementById('loginMessage').style.display = 'block'; // Show the login message
+        
+            // Clear the chat box before loading messages to prevent duplicates
+            chatBox.innerHTML = '';
+            loadMessages(); // Load previous messages
+        }
+        
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('messages')) || [];
+            messages.forEach(msg => addMessage(msg.content, msg.sender, false));
+        }
+        
+        function addMessage(content, sender, save = true) {
+            const message = document.createElement('div');
+        
+            if (sender === currentUser) {
+                message.classList.add('message', 'sent'); // Current user's messages on the right
+            } else {
+                message.classList.add('message', 'received'); // Other user's messages on the left
+                message.addEventListener('click', () => replyToMessage(content, sender)); // Add click event for replies
+            }
+        
+            message.textContent = content; // Only show the message content
+        
+            const time = document.createElement('span');
+            time.classList.add('timestamp');
+            time.textContent = new Date().toLocaleTimeString(); // Get current time
+            message.appendChild(time);
+        
+            chatBox.appendChild(message);
+        
+            if (save) saveMessage(content, sender);
+        
+            scrollToBottom(); // Scroll to the latest message after adding a new one
+        }
+        
+        function saveMessage(content, sender) {
+            const messages = JSON.parse(localStorage.getItem('messages')) || [];
+            messages.push({ content, sender });
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+        
+        sendBtn.addEventListener('click', () => {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                addMessage(messageText, currentUser); // Add message from the current user
+                messageInput.value = ''; // Clear input after sending
+                clearReply(); // Clear any reply context
+            }
+        });
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+        
+        // Clear Messages Functionality
+        const clearBtn = document.getElementById('clearBtn'); // Get the Clear Messages button
+        clearBtn.addEventListener('click', clearMessages); // Add event listener for the button
+        
+        function clearMessages() {
+            let confirmCount = 0; // Initialize confirmation count
+        
+            // Loop to ask for confirmation three times
+            while (confirmCount < 3) {
+                const userConfirmed = confirm("Ano sure kana ba na dedelete mo ha sira ulo ka pala eh!!!!");
+                if (userConfirmed) {
+                    confirmCount++; // Increment count if confirmed
+                } else {
+                    return; // Exit if the user cancels
+                }
+            }
+            chatBox.innerHTML = ''; // Clear the chat box
+            localStorage.removeItem('messages'); // Remove messages from localStorage
+            alert("Messages have been cleared."); // Optional alert for confirmation
+        }
+        
+        // Function to scroll to the latest message
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom of the chat box
+        }
+        
+        // Function to handle replying to a message
+        function replyToMessage(content, sender) {
+            messageInput.value = `Replying to ${sender}: ${content}`; // Populate the input with the message content
+            messageInput.focus(); // Focus on the input field for editing
+            displayReplyContext(content, sender); // Show reply context
+        }
+        
+        // Function to display reply context
+        function displayReplyContext(content, sender) {
+            replyContainer.innerHTML = `<strong>Replying to ${sender}:</strong><br><em>${content}</em>`;
+            replyContainer.style.display = 'block'; // Show reply context
+        }
+        
+        // Function to clear reply context
+        function clearReply() {
+            replyContainer.innerHTML = ''; // Clear reply context
+            replyContainer.style.display = 'none'; // Hide reply context
+        }
+        </script>
+    
+</body>
+</html>
